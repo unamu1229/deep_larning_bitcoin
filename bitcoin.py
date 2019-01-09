@@ -135,7 +135,8 @@ if __name__ == '__main__':
     '''
     モデル学習
     '''
-    epochs = 500
+    epochs = 5
+    #epochs = 500
     batch_size = 10
 
     init = tf.global_variables_initializer()
@@ -200,7 +201,7 @@ if __name__ == '__main__':
     '''
     plt.rc('font', family='serif')
     plt.figure()
-    plt.ylim([0, 10000])
+    plt.ylim([0, 1000])
     plt.plot(marketPrices[:, 0], linestyle='dotted', color='#aaaaaa')
     plt.plot(original, linestyle='dashed', color='black')
     plt.plot(predicted, color='black')
