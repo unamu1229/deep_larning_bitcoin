@@ -116,7 +116,7 @@ if __name__ == '__main__':
     モデル設定
     '''
     n_in = len(X[0][0])  # 1
-    n_hidden = 30
+    n_hidden = 300
     n_out = len(Y[0])  # 1
 
     x = tf.placeholder(tf.float32, shape=[None, maxlen, n_in])
@@ -135,8 +135,8 @@ if __name__ == '__main__':
     '''
     モデル学習
     '''
-    epochs = 5
-    #epochs = 500
+    #epochs = 5
+    epochs = 500
     batch_size = 10
 
     init = tf.global_variables_initializer()
@@ -202,7 +202,7 @@ if __name__ == '__main__':
     plt.rc('font', family='serif')
     plt.figure()
     plt.ylim([0, 1000])
-    plt.plot(marketPrices[:, 0], linestyle='dotted', color='#aaaaaa')
+    plt.plot(marketPrices[:, 1], linestyle='dotted', color='#aaaaaa')
     plt.plot(original, linestyle='dashed', color='black')
     plt.plot(predicted, color='black')
     plt.show()
