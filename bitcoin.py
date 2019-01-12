@@ -11,6 +11,7 @@ import datetime
 def inference(x, n_batch, maxlen=None, n_hidden=None, n_out=None):
     def weight_variable(shape):
         initial = tf.truncated_normal(shape, stddev=0.01)
+        #initial = np.sqrt(2.0 / shape[0]) * tf.truncated_normal(shape)
         return tf.Variable(initial)
 
     def bias_variable(shape):
@@ -40,6 +41,7 @@ def inference(x, n_batch, maxlen=None, n_hidden=None, n_out=None):
 
 def loss(y, t):
     mse = tf.reduce_mean(tf.square(y - t))
+
     return mse
 
 
@@ -88,7 +90,8 @@ if __name__ == '__main__':
         marketPrices.append([
             # 日付を2009/1/1からの経過日数にする
             (datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S") - datetime.datetime(2009, 1, 1)).days,
-            price
+            # 正規化
+            price / 9710
         ])
     marketPrices = pd.DataFrame(data=marketPrices).values
 
@@ -135,8 +138,7 @@ if __name__ == '__main__':
     '''
     モデル学習
     '''
-    #epochs = 5
-    epochs = 500
+    epochs = 300
     batch_size = 10
 
     init = tf.global_variables_initializer()
@@ -179,9 +181,19 @@ if __name__ == '__main__':
     truncate = maxlen
     Z = X[:1]  # 元データの最初の一部だけ切り出し
 
-    original = [target[i] for i in range(maxlen)]
     predicted = [None for i in range(maxlen)]
 
+    for i in range(length_of_sequences - maxlen - 1):
+        start = i * batch_size
+        end = start + batch_size
+        y_ = y.eval(session=sess, feed_dict={
+            x: X[i:i+1],
+            n_batch: 1
+        })
+        predicted.append(y_.reshape(-1))
+
+
+    '''
     for i in range(length_of_sequences - maxlen + 1):
         # 最後の時系列データから未来を予測
         z_ = Z[-1:]
@@ -195,14 +207,14 @@ if __name__ == '__main__':
             .reshape(1, maxlen, n_in)
         Z = np.append(Z, sequence_, axis=0)
         predicted.append(y_.reshape(-1))
+    '''
 
     '''
     グラフで可視化
     '''
     plt.rc('font', family='serif')
     plt.figure()
-    plt.ylim([0, 1000])
+    plt.ylim([-1.5, 1.5])
     plt.plot(marketPrices[:, 1], linestyle='dotted', color='#aaaaaa')
-    plt.plot(original, linestyle='dashed', color='black')
     plt.plot(predicted, color='black')
     plt.show()
