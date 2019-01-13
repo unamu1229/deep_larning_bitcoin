@@ -10,9 +10,9 @@ import datetime
 
 def inference(x, n_batch, maxlen=None, n_hidden=None, n_out=None):
     def weight_variable(shape):
-        initial = tf.truncated_normal(shape, stddev=0.01)
+        # initial = tf.truncated_normal(shape, stddev=0.01)
         #initial = np.sqrt(2.0 / shape[0]) * tf.truncated_normal(shape)
-        # todo 試す initial = np.sqrt(2.0 / shape[0]) * tf.truncated_normal(shape, stddev=0.01)
+        initial = np.sqrt(2.0 / shape[0]) * tf.truncated_normal(shape, stddev=0.01)
         return tf.Variable(initial)
 
     def bias_variable(shape):
