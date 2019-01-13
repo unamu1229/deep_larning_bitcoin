@@ -10,8 +10,6 @@ import datetime
 
 def inference(x, n_batch, maxlen=None, n_hidden=None, n_out=None):
     def weight_variable(shape):
-        # initial = tf.truncated_normal(shape, stddev=0.01)
-        #initial = np.sqrt(2.0 / shape[0]) * tf.truncated_normal(shape)
         initial = np.sqrt(2.0 / shape[0]) * tf.truncated_normal(shape, stddev=0.01)
         return tf.Variable(initial)
 
@@ -47,8 +45,9 @@ def loss(y, t):
 
 
 def training(loss):
+    # AdamOptimizer設定をのデフォルトにする。
     optimizer = \
-        tf.train.AdamOptimizer(learning_rate=0.001, beta1=0.9, beta2=0.999)
+        tf.train.AdamOptimizer()
 
     train_step = optimizer.minimize(loss)
     return train_step
