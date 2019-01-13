@@ -88,10 +88,9 @@ if __name__ == '__main__':
     marketPrices = []
     for date, price in pd.read_csv('market-price.csv').values.tolist():
         marketPrices.append([
-            # 日付を2009/1/1からの経過日数にする
-            (datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S") - datetime.datetime(2009, 1, 1)).days,
-            # 正規化
-            price / 9710
+            # 日付を2009/1/1からの経過日数にして、正規化する
+            (datetime.datetime.strptime(date, "%Y-%m-%d %H:%M:%S") - datetime.datetime(2009, 1, 1)).days / 604,
+            price
         ])
     marketPrices = pd.DataFrame(data=marketPrices).values
 
@@ -214,7 +213,7 @@ if __name__ == '__main__':
     '''
     plt.rc('font', family='serif')
     plt.figure()
-    plt.ylim([-1.5, 1.5])
+    plt.ylim([0, 10000])
     plt.plot(marketPrices[:, 1], linestyle='dotted', color='#aaaaaa')
     plt.plot(predicted, color='black')
     plt.show()
