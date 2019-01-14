@@ -53,6 +53,28 @@ def training(loss):
     train_step = optimizer.minimize(loss)
     return train_step
 
+def make_elapsed_dates(first, last):
+    first = (datetime.datetime.strptime(first, "%Y-%m-%d %H:%M:%S") - datetime.datetime(2009, 1, 1)).days
+    last = (datetime.datetime.strptime(last, "%Y-%m-%d %H:%M:%S") - datetime.datetime(2009, 1, 1)).days
+
+    date = []
+    for elapsed in range(first, last):
+        date.append(elapsed / 604)
+
+    length_of_sequences = len(date)
+    maxlen = 25
+
+    data = []
+
+    for i in range(0, length_of_sequences - maxlen):
+        if (i % 2) == 1:
+            continue
+        data.append(date[i: i + maxlen])
+
+    X = np.array(data).reshape(len(data), maxlen, 1)
+
+    return X
+
 class EarlyStopping():
     def __init__(self, patience=0, verbose=0):
         self._step = 0
@@ -147,6 +169,9 @@ if __name__ == '__main__':
     # sess.run(init)
     saver.restore(sess, MODEL_DIR + '/model.ckpt')
 
+    '''
+    学習せずに、保存したモデルを使う
+    
     n_batches = N_train // batch_size
 
     for epoch in range(816, epochs):
@@ -179,16 +204,15 @@ if __name__ == '__main__':
 
     model_path = saver.save(sess, MODEL_DIR + '/model.ckpt')
     print('Model saved to:', model_path)
+    '''
 
     '''
     出力を用いて予測
     '''
-    truncate = maxlen
-    Z = X[:1]  # 元データの最初の一部だけ切り出し
-
+    X = make_elapsed_dates('2009-01-03 00:00:00', '2020-01-02 00:00:00')
     predicted = [None for i in range(maxlen)]
 
-    for i in range(length_of_sequences - maxlen - 1):
+    for i in range(len(X) - maxlen - 1):
         start = i * batch_size
         end = start + batch_size
         y_ = y.eval(session=sess, feed_dict={
@@ -199,6 +223,8 @@ if __name__ == '__main__':
 
 
     '''
+    Z = X[:1]  # 元データの最初の一部だけ切り出し
+    
     for i in range(length_of_sequences - maxlen + 1):
         # 最後の時系列データから未来を予測
         z_ = Z[-1:]
