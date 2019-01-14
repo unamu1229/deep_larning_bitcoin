@@ -6,12 +6,12 @@ from sklearn.utils import shuffle
 
 import pandas as pd
 import datetime
+import os
 
+MODEL_DIR = os.path.join(os.path.dirname(__file__), 'model')
 
 def inference(x, n_batch, maxlen=None, n_hidden=None, n_out=None):
     def weight_variable(shape):
-        # initial = tf.truncated_normal(shape, stddev=0.01)
-        #initial = np.sqrt(2.0 / shape[0]) * tf.truncated_normal(shape)
         initial = np.sqrt(2.0 / shape[0]) * tf.truncated_normal(shape, stddev=0.01)
         return tf.Variable(initial)
 
@@ -138,10 +138,11 @@ if __name__ == '__main__':
     '''
     モデル学習
     '''
-    epochs = 300
+    epochs = 1000
     batch_size = 10
 
     init = tf.global_variables_initializer()
+    saver = tf.train.Saver()
     sess = tf.Session()
     sess.run(init)
 
@@ -174,6 +175,9 @@ if __name__ == '__main__':
         # Early Stopping チェック
         if early_stopping.validate(val_loss):
             break
+
+    model_path = saver.save(sess, MODEL_DIR + '/model.ckpt')
+    print('Model saved to:', model_path)
 
     '''
     出力を用いて予測
