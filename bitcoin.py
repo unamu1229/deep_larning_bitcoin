@@ -130,7 +130,7 @@ if __name__ == '__main__':
     loss = loss(y, t)
     train_step = training(loss)
 
-    early_stopping = EarlyStopping(patience=100, verbose=1)
+    early_stopping = EarlyStopping(patience=300, verbose=1)
     history = {
         'val_loss': []
     }
@@ -138,17 +138,18 @@ if __name__ == '__main__':
     '''
     モデル学習
     '''
-    epochs = 1000
+    epochs = 2000
     batch_size = 10
 
     init = tf.global_variables_initializer()
     saver = tf.train.Saver()
     sess = tf.Session()
-    sess.run(init)
+    # sess.run(init)
+    saver.restore(sess, MODEL_DIR + '/model.ckpt')
 
     n_batches = N_train // batch_size
 
-    for epoch in range(epochs):
+    for epoch in range(816, epochs):
         X_, Y_ = shuffle(X_train, Y_train)
 
         for i in range(n_batches):
