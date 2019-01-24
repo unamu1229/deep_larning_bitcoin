@@ -2,11 +2,12 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-from sklearn.utils import shuffle
 
 import pandas as pd
 import datetime
 import os
+
+import matplotlib.dates as mdates
 
 MODEL_DIR = os.path.join(os.path.dirname(__file__), 'model')
 
@@ -19,11 +20,14 @@ def inference(x, n_batch, maxlen=None, n_hidden=None, n_out=None):
         initial = tf.zeros(shape, dtype=tf.float32)
         return tf.Variable(initial)
 
+    # LSTMをここで利用する
     cell = tf.nn.rnn_cell.BasicLSTMCell(n_hidden, forget_bias=1.0)
     initial_state = cell.zero_state(n_batch, tf.float32)
 
     state = initial_state
     outputs = []  # 過去の隠れ層の出力を保存
+
+    # LSTMの名前空間をつける
     with tf.variable_scope('LSTM'):
         for t in range(maxlen):
             if t > 0:
@@ -54,26 +58,27 @@ def training(loss):
     return train_step
 
 def make_elapsed_dates(first, last):
-    first = (datetime.datetime.strptime(first, "%Y-%m-%d %H:%M:%S") - datetime.datetime(2009, 1, 1)).days
-    last = (datetime.datetime.strptime(last, "%Y-%m-%d %H:%M:%S") - datetime.datetime(2009, 1, 1)).days
 
-    date = []
-    for elapsed in range(first, last):
-        date.append(elapsed / 604)
+    elapsed_date = []
+    elapsed_days = []
 
-    length_of_sequences = len(date)
+    first_date = datetime.datetime.strptime(first, '%Y-%m-%d %H:%M:%S')
+    last_date = datetime.datetime.strptime(last, '%Y-%m-%d %H:%M:%S')
+    while first_date <= last_date:
+        elapsed_days.append((first_date - datetime.datetime(2009, 1, 1)).days / 604)
+        elapsed_date.append(first_date)
+        first_date += datetime.timedelta(days = 2)
+
+    length_of_sequences = len(elapsed_days)
     maxlen = 25
 
-    data = []
-
+    elapsed_days_data = []
     for i in range(0, length_of_sequences - maxlen):
-        if (i % 2) == 1:
-            continue
-        data.append(date[i: i + maxlen])
+        elapsed_days_data.append(elapsed_days[i: i + maxlen])
 
-    X = np.array(data).reshape(len(data), maxlen, 1)
+    X = np.array(elapsed_days_data).reshape(len(elapsed_days_data), maxlen, 1)
 
-    return X
+    return [X, elapsed_date]
 
 class EarlyStopping():
     def __init__(self, patience=0, verbose=0):
@@ -209,7 +214,9 @@ if __name__ == '__main__':
     '''
     出力を用いて予測
     '''
-    X = make_elapsed_dates('2009-01-03 00:00:00', '2020-01-02 00:00:00')
+    (X, elapsed_date) = make_elapsed_dates('2009-01-03 00:00:00', '2020-01-02 00:00:00')
+    elapsed_date = elapsed_date[:(len(elapsed_date) - maxlen - 1)]
+
     predicted = [None for i in range(maxlen)]
 
     for i in range(len(X) - maxlen - 1):
@@ -243,9 +250,11 @@ if __name__ == '__main__':
     '''
     グラフで可視化
     '''
-    plt.rc('font', family='serif')
-    plt.figure()
-    plt.ylim([0, 10000])
-    plt.plot(marketPrices[:, 1], linestyle='dotted', color='#aaaaaa')
-    plt.plot(predicted, color='black')
+    ax = plt.subplot()
+    ax.plot(elapsed_date, predicted, color='black')
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y/%m/%d"))
+    ax.xaxis.set_major_locator(mdates.DayLocator(interval=100))
+    ax.set_xlim(datetime.datetime(2009, 1, 3), datetime.datetime(2020, 1, 2))
+    plt.plot(elapsed_date[:1825], marketPrices[:, 1], linestyle='dotted', color='#aaaaaa')
+    plt.xticks(rotation=70)
     plt.show()
