@@ -232,24 +232,6 @@ if __name__ == '__main__':
 
 
     '''
-    Z = X[:1]  # 元データの最初の一部だけ切り出し
-    
-    for i in range(length_of_sequences - maxlen + 1):
-        # 最後の時系列データから未来を予測
-        z_ = Z[-1:]
-        y_ = y.eval(session=sess, feed_dict={
-            x: Z[-1:],
-            n_batch: 1
-        })
-        # 予測結果を用いて新しい時系列データを生成
-        sequence_ = np.concatenate(
-            (z_.reshape(maxlen, n_in)[1:], y_), axis=0) \
-            .reshape(1, maxlen, n_in)
-        Z = np.append(Z, sequence_, axis=0)
-        predicted.append(y_.reshape(-1))
-    '''
-
-    '''
     グラフで可視化
     '''
     ax = plt.subplot()
