@@ -171,15 +171,16 @@ if __name__ == '__main__':
     init = tf.global_variables_initializer()
     saver = tf.train.Saver()
     sess = tf.Session()
-    # sess.run(init)
     saver.restore(sess, MODEL_DIR + '/model.ckpt')
 
     '''
     学習せずに、保存したモデルを使う
     
+    sess.run(init)
+    
     n_batches = N_train // batch_size
 
-    for epoch in range(816, epochs):
+    for epoch in range(epochs):
         X_, Y_ = shuffle(X_train, Y_train)
 
         for i in range(n_batches):
@@ -207,6 +208,7 @@ if __name__ == '__main__':
         if early_stopping.validate(val_loss):
             break
 
+    # 学習したモデルを保存する
     model_path = saver.save(sess, MODEL_DIR + '/model.ckpt')
     print('Model saved to:', model_path)
     '''
@@ -253,7 +255,7 @@ if __name__ == '__main__':
     ax = plt.subplot()
     ax.plot(elapsed_date, predicted, color='black')
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y/%m/%d"))
-    ax.xaxis.set_major_locator(mdates.DayLocator(interval=100))
+    ax.xaxis.set_major_locator(mdates.DayLocator(interval=130))
     ax.set_xlim(datetime.datetime(2009, 1, 3), datetime.datetime(2020, 1, 2))
     plt.plot(elapsed_date[:1825], marketPrices[:, 1], linestyle='dotted', color='#aaaaaa')
     plt.xticks(rotation=70)
